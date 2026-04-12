@@ -1,168 +1,572 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mindful Moments | Mood Tracker</title>
-    <style>
-        :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --primary-accent: #6c63ff;
-            --text-main: #2d3436;
-            --streak-gold: #f1c40f;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mood Tracker</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            display: flex;
-            justify-content: center;
-            padding: 40px 20px;
-            margin: 0;
-        }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f0f1a;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
 
-        .container {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 500px;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            text-align: center;
-        }
+    .container { max-width: 600px; margin: 0 auto; }
 
-        header h1 { margin-bottom: 0.5rem; color: var(--primary-accent); }
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+    }
+    header h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+    header h1 span { color: #a78bfa; }
 
-        .streak-badge {
-            display: inline-block;
-            background: #fff9db;
-            color: #856404;
-            padding: 5px 15px;
-            border-radius: 15px;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            border: 1px solid var(--streak-gold);
-        }
+    /* Streak badge */
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      box-shadow: 0 0 16px rgba(168, 85, 247, 0.4);
+    }
+    .streak-badge .flame { font-size: 1.1rem; }
 
-        .mood-selector {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 2rem;
-        }
+    /* Card */
+    .card {
+      background: #1a1a2e;
+      border: 1px solid #2d2d4e;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #7c7ca0;
+      margin-bottom: 16px;
+    }
 
-        .mood-btn {
-            font-size: 2.5rem;
-            background: none;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-            padding: 10px;
-        }
+    /* Date display */
+    .today-date {
+      font-size: 0.9rem;
+      color: #7c7ca0;
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
-        .mood-btn:hover {
-            transform: scale(1.2);
-            background: #f8f9fa;
-        }
+    /* Already logged */
+    .logged-today {
+      text-align: center;
+      padding: 12px;
+      background: rgba(167, 139, 250, 0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(167, 139, 250, 0.2);
+      font-size: 0.9rem;
+      color: #a78bfa;
+      margin-bottom: 16px;
+    }
 
-        .mood-btn.selected {
-            border-color: var(--primary-accent);
-            background: #eeeefd;
-        }
+    /* Mood grid */
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .mood-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 8px;
+      border: 2px solid #2d2d4e;
+      border-radius: 14px;
+      background: #12122a;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.72rem;
+      color: #9999bb;
+      user-select: none;
+    }
+    .mood-btn .emoji { font-size: 1.8rem; line-height: 1; }
+    .mood-btn:hover { border-color: #a78bfa; color: #e2e8f0; transform: translateY(-2px); }
+    .mood-btn.selected {
+      border-color: #a78bfa;
+      background: rgba(167, 139, 250, 0.15);
+      color: #e2e8f0;
+      box-shadow: 0 0 12px rgba(167, 139, 250, 0.3);
+    }
 
-        .reflection-area {
-            margin-top: 1.5rem;
-            text-align: left;
-        }
+    /* Notes */
+    textarea {
+      width: 100%;
+      background: #12122a;
+      border: 1.5px solid #2d2d4e;
+      border-radius: 12px;
+      color: #e2e8f0;
+      padding: 12px 14px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+      margin-bottom: 16px;
+      transition: border-color 0.15s;
+    }
+    textarea:focus { outline: none; border-color: #a78bfa; }
+    textarea::placeholder { color: #4a4a6a; }
 
-        #prompt-text {
-            font-style: italic;
-            color: #636e72;
-            margin-bottom: 10px;
-            display: block;
-        }
+    /* Save button */
+    .save-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+    .save-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .save-btn:active { transform: scale(0.98); }
+    .save-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-        textarea {
-            width: 100%;
-            height: 100px;
-            padding: 12px;
-            border: 1px solid #dfe6e9;
-            border-radius: 10px;
-            resize: none;
-            font-family: inherit;
-            box-sizing: border-box;
-        }
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-box {
+      background: #1a1a2e;
+      border: 1px solid #2d2d4e;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-box .stat-value { font-size: 1.8rem; font-weight: 700; color: #a78bfa; }
+    .stat-box .stat-label { font-size: 0.72rem; color: #7c7ca0; margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        button#save-btn {
-            margin-top: 1.5rem;
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary-accent);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
+    /* History */
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #12122a;
+      border: 1px solid #2d2d4e;
+      border-radius: 14px;
+      padding: 14px 16px;
+      transition: border-color 0.15s;
+    }
+    .history-item:hover { border-color: #4a4a6a; }
+    .history-emoji { font-size: 1.8rem; flex-shrink: 0; }
+    .history-info { flex: 1; min-width: 0; }
+    .history-mood { font-weight: 600; font-size: 0.95rem; }
+    .history-note {
+      font-size: 0.8rem;
+      color: #7c7ca0;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .history-date { font-size: 0.75rem; color: #4a4a6a; flex-shrink: 0; text-align: right; }
 
-        button#save-btn:hover { opacity: 0.9; }
+    .empty-state {
+      text-align: center;
+      padding: 32px;
+      color: #4a4a6a;
+      font-size: 0.9rem;
+    }
 
-        .history {
-            margin-top: 2rem;
-            border-top: 1px solid #eee;
-            padding-top: 1rem;
-            font-size: 0.9rem;
-            color: #b2bec3;
-        }
-    </style>
+    /* Tab bar */
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      background: #1a1a2e;
+      border: 1px solid #2d2d4e;
+      border-radius: 14px;
+      padding: 6px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: #7c7ca0;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      background: #7c3aed;
+      color: white;
+    }
+
+    /* Panel */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #7c3aed;
+      color: white;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    /* Mood color hints */
+    .mood-btn[data-mood="Ecstatic"] .emoji { filter: drop-shadow(0 0 4px #facc15); }
+    .mood-btn[data-mood="Happy"] .emoji { filter: drop-shadow(0 0 4px #86efac); }
+    .mood-btn[data-mood="Calm"] .emoji { filter: drop-shadow(0 0 4px #67e8f9); }
+    .mood-btn[data-mood="Content"] .emoji { filter: drop-shadow(0 0 4px #a78bfa); }
+    .mood-btn[data-mood="Meh"] .emoji { filter: drop-shadow(0 0 4px #94a3b8); }
+    .mood-btn[data-mood="Tired"] .emoji { filter: drop-shadow(0 0 4px #60a5fa); }
+    .mood-btn[data-mood="Anxious"] .emoji { filter: drop-shadow(0 0 4px #fbbf24); }
+    .mood-btn[data-mood="Sad"] .emoji { filter: drop-shadow(0 0 4px #818cf8); }
+    .mood-btn[data-mood="Angry"] .emoji { filter: drop-shadow(0 0 4px #f87171); }
+    .mood-btn[data-mood="Stressed"] .emoji { filter: drop-shadow(0 0 4px #fb923c); }
+    .mood-btn[data-mood="Scared"] .emoji { filter: drop-shadow(0 0 4px #c084fc); }
+    .mood-btn[data-mood="Grateful"] .emoji { filter: drop-shadow(0 0 4px #34d399); }
+  </style>
 </head>
 <body>
-
-<div class="container">
+  <div class="container">
     <header>
-        <h1>How are you?</h1>
-        <div class="streak-badge">🔥 <span id="streak-count">0</span> Day Streak</div>
+      <h1>Mood <span>Tracker</span></h1>
+      <div class="streak-badge">
+        <span class="flame">🔥</span>
+        <span id="streak-count">0</span>
+        <span>day streak</span>
+      </div>
     </header>
 
-    <div class="mood-selector">
-        <button class="mood-btn" onclick="selectMood('😢', this)">😢</button>
-        <button class="mood-btn" onclick="selectMood('😐', this)">😐</button>
-        <button class="mood-btn" onclick="selectMood('🙂', this)">🙂</button>
-        <button class="mood-btn" onclick="selectMood('😄', this)">😄</button>
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('log')">Log Mood</button>
+      <button class="tab-btn" onclick="switchTab('stats')">Stats</button>
+      <button class="tab-btn" onclick="switchTab('history')">History</button>
     </div>
 
-    <div class="reflection-area">
-        <span id="prompt-text">Loading prompt...</span>
-        <textarea id="reflection-input" placeholder="Write your thoughts here..."></textarea>
+    <!-- LOG TAB -->
+    <div id="tab-log" class="panel active">
+      <div class="card">
+        <h2>How are you feeling?</h2>
+        <div class="today-date" id="today-label"></div>
+        <div id="already-logged" class="logged-today" style="display:none">
+          You already logged your mood today! Come back tomorrow.
+        </div>
+        <div class="mood-grid" id="mood-grid">
+          <button class="mood-btn" data-mood="Ecstatic"><span class="emoji">🤩</span>Ecstatic</button>
+          <button class="mood-btn" data-mood="Happy"><span class="emoji">😄</span>Happy</button>
+          <button class="mood-btn" data-mood="Calm"><span class="emoji">😌</span>Calm</button>
+          <button class="mood-btn" data-mood="Content"><span class="emoji">🙂</span>Content</button>
+          <button class="mood-btn" data-mood="Meh"><span class="emoji">😐</span>Meh</button>
+          <button class="mood-btn" data-mood="Tired"><span class="emoji">😴</span>Tired</button>
+          <button class="mood-btn" data-mood="Anxious"><span class="emoji">😰</span>Anxious</button>
+          <button class="mood-btn" data-mood="Sad"><span class="emoji">😢</span>Sad</button>
+          <button class="mood-btn" data-mood="Angry"><span class="emoji">😠</span>Angry</button>
+          <button class="mood-btn" data-mood="Stressed"><span class="emoji">😤</span>Stressed</button>
+          <button class="mood-btn" data-mood="Scared"><span class="emoji">😨</span>Scared</button>
+          <button class="mood-btn" data-mood="Grateful"><span class="emoji">🥰</span>Grateful</button>
+        </div>
+        <textarea id="notes-input" placeholder="Add a note about your day... (optional)"></textarea>
+        <button class="save-btn" id="save-btn" onclick="saveMood()" disabled>Save Today's Mood</button>
+      </div>
     </div>
 
-    <button id="save-btn" onclick="saveEntry()">Check In</button>
-
-    <div class="history">
-        <p id="last-checkin">Last check-in: Never</p>
+    <!-- STATS TAB -->
+    <div id="tab-stats" class="panel">
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-value" id="stat-streak">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Logs</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-value" id="stat-best">0</div>
+          <div class="stat-label">Best Streak</div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Most Common Moods</h2>
+        <div id="top-moods" style="margin-top:4px;"></div>
+      </div>
+      <div class="card">
+        <h2>Last 7 Days</h2>
+        <div id="week-view" style="display:flex;gap:8px;margin-top:4px;justify-content:center;flex-wrap:wrap;"></div>
+      </div>
     </div>
-</div>
 
-<script>
-    const prompts = [
-        "What’s one small thing that went well today?",
-        "What’s weighing on your mind right now?",
-        "Name three things you’re grateful for.",
-        "How did you take care of yourself today?",
-        "What is a goal you have for tomorrow?"
-    ];
+    <!-- HISTORY TAB -->
+    <div id="tab-history" class="panel">
+      <div class="card" style="padding:0;overflow:hidden;">
+        <div style="padding:16px 20px 8px; display:flex; justify-content:space-between; align-items:center;">
+          <h2 style="margin:0;">All Entries</h2>
+          <button onclick="clearHistory()" style="background:none;border:none;color:#f87171;cursor:pointer;font-size:0.8rem;">Clear All</button>
+        </div>
+        <div style="padding:0 16px 16px;" id="history-list">
+          <div class="empty-state">No entries yet.<br>Start logging your mood!</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    let selectedMood = '';
+  <div class="toast" id="toast"></div>
 
-    // Initialize App
-    window.onload = () => {
-        displayRandomPrompt();
-        updateUI();
-    };
+  <script>
+    const STORAGE_KEY = 'moodtracker_v1';
 
-    function displayRandomPrompt() {
-        const randomIndex = Math.floor(Math.random() * prompts.
+    // ── helpers ──────────────────────────────────────────────────────
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    }
+
+    function dateLabel(str) {
+      const d = new Date(str + 'T00:00:00');
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function getData() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { entries: [], bestStreak: 0 }; }
+      catch { return { entries: [], bestStreak: 0 }; }
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    // ── streak calculation ───────────────────────────────────────────
+    function calcStreak(entries) {
+      if (!entries.length) return 0;
+      const dates = [...new Set(entries.map(e => e.date))].sort().reverse();
+      const today = todayStr();
+      const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+      if (dates[0] !== today && dates[0] !== yesterday) return 0;
+      let streak = 1;
+      for (let i = 1; i < dates.length; i++) {
+        const prev = new Date(dates[i - 1] + 'T00:00:00');
+        const curr = new Date(dates[i] + 'T00:00:00');
+        const diff = (prev - curr) / 86400000;
+        if (diff === 1) streak++;
+        else break;
+      }
+      return streak;
+    }
+
+    // ── state ────────────────────────────────────────────────────────
+    let selectedMood = null;
+
+    // ── init ─────────────────────────────────────────────────────────
+    function init() {
+      const today = todayStr();
+      document.getElementById('today-label').textContent = dateLabel(today);
+
+      // mood button selection
+      document.querySelectorAll('.mood-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          selectedMood = btn.dataset.mood;
+          document.getElementById('save-btn').disabled = false;
+        });
+      });
+
+      const data = getData();
+      const loggedToday = data.entries.some(e => e.date === today);
+      if (loggedToday) {
+        document.getElementById('already-logged').style.display = 'block';
+        document.getElementById('mood-grid').style.pointerEvents = 'none';
+        document.getElementById('mood-grid').style.opacity = '0.4';
+        document.getElementById('notes-input').disabled = true;
+        document.getElementById('save-btn').disabled = true;
+      }
+
+      updateStreak();
+      renderStats();
+      renderHistory();
+    }
+
+    // ── save ─────────────────────────────────────────────────────────
+    function saveMood() {
+      if (!selectedMood) return;
+      const data = getData();
+      const today = todayStr();
+      if (data.entries.some(e => e.date === today)) return;
+
+      const entry = {
+        date: today,
+        mood: selectedMood,
+        emoji: document.querySelector(`.mood-btn[data-mood="${selectedMood}"] .emoji`).textContent,
+        note: document.getElementById('notes-input').value.trim()
+      };
+      data.entries.push(entry);
+
+      const streak = calcStreak(data.entries);
+      if (streak > (data.bestStreak || 0)) data.bestStreak = streak;
+      saveData(data);
+
+      // lock form
+      document.getElementById('already-logged').style.display = 'block';
+      document.getElementById('mood-grid').style.pointerEvents = 'none';
+      document.getElementById('mood-grid').style.opacity = '0.4';
+      document.getElementById('notes-input').disabled = true;
+      document.getElementById('save-btn').disabled = true;
+
+      updateStreak();
+      renderStats();
+      renderHistory();
+      showToast(streak > 1 ? `🔥 ${streak} day streak!` : '✅ Mood logged!');
+    }
+
+    // ── streak display ───────────────────────────────────────────────
+    function updateStreak() {
+      const data = getData();
+      const streak = calcStreak(data.entries);
+      document.getElementById('streak-count').textContent = streak;
+    }
+
+    // ── stats ────────────────────────────────────────────────────────
+    function renderStats() {
+      const data = getData();
+      const streak = calcStreak(data.entries);
+      document.getElementById('stat-streak').textContent = streak;
+      document.getElementById('stat-total').textContent = data.entries.length;
+      document.getElementById('stat-best').textContent = data.bestStreak || streak;
+
+      // top moods
+      const counts = {};
+      data.entries.forEach(e => { counts[e.mood] = (counts[e.mood] || 0) + 1; });
+      const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      const container = document.getElementById('top-moods');
+      if (!sorted.length) {
+        container.innerHTML = '<div class="empty-state">No data yet.</div>';
+      } else {
+        const max = sorted[0][1];
+        container.innerHTML = sorted.map(([mood, count]) => {
+          const emoji = data.entries.find(e => e.mood === mood)?.emoji || '';
+          const pct = Math.round((count / max) * 100);
+          return `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <span style="font-size:1.3rem;width:28px;text-align:center;">${emoji}</span>
+              <span style="width:72px;font-size:0.85rem;color:#ccc;">${mood}</span>
+              <div style="flex:1;background:#12122a;border-radius:999px;height:8px;overflow:hidden;">
+                <div style="width:${pct}%;background:linear-gradient(90deg,#7c3aed,#a855f7);height:100%;border-radius:999px;"></div>
+              </div>
+              <span style="font-size:0.8rem;color:#7c7ca0;width:24px;text-align:right;">${count}</span>
+            </div>`;
+        }).join('');
+      }
+
+      // last 7 days
+      const week = document.getElementById('week-view');
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000).toISOString().slice(0, 10);
+        days.push(d);
+      }
+      week.innerHTML = days.map(d => {
+        const entry = data.entries.slice().reverse().find(e => e.date === d);
+        const dayName = new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short' });
+        return `
+          <div style="text-align:center;flex:1;min-width:36px;">
+            <div style="font-size:1.5rem;line-height:1;margin-bottom:4px;">${entry ? entry.emoji : '·'}</div>
+            <div style="font-size:0.65rem;color:${entry ? '#a78bfa' : '#4a4a6a'};">${dayName}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // ── history ──────────────────────────────────────────────────────
+    function renderHistory() {
+      const data = getData();
+      const container = document.getElementById('history-list');
+      if (!data.entries.length) {
+        container.innerHTML = '<div class="empty-state">No entries yet.<br>Start logging your mood!</div>';
+        return;
+      }
+      const sorted = [...data.entries].sort((a, b) => b.date.localeCompare(a.date));
+      container.innerHTML = sorted.map(e => `
+        <div class="history-item">
+          <span class="history-emoji">${e.emoji}</span>
+          <div class="history-info">
+            <div class="history-mood">${e.mood}</div>
+            ${e.note ? `<div class="history-note">${escHtml(e.note)}</div>` : ''}
+          </div>
+          <div class="history-date">${dateLabel(e.date)}</div>
+        </div>
+      `).join('');
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── clear ────────────────────────────────────────────────────────
+    function clearHistory() {
+      if (!confirm('Delete all mood history? This cannot be undone.')) return;
+      saveData({ entries: [], bestStreak: 0 });
+      selectedMood = null;
+      document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+      document.getElementById('notes-input').value = '';
+      document.getElementById('notes-input').disabled = false;
+      document.getElementById('save-btn').disabled = true;
+      document.getElementById('mood-grid').style.pointerEvents = '';
+      document.getElementById('mood-grid').style.opacity = '';
+      document.getElementById('already-logged').style.display = 'none';
+      updateStreak();
+      renderStats();
+      renderHistory();
+      showToast('History cleared');
+    }
+
+    // ── tabs ─────────────────────────────────────────────────────────
+    function switchTab(name) {
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + name).classList.add('active');
+      event.target.classList.add('active');
+      if (name === 'stats') renderStats();
+      if (name === 'history') renderHistory();
+    }
+
+    // ── toast ────────────────────────────────────────────────────────
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    init();
+  </script>
+</body>
+</html>
